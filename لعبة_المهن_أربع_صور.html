@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#fff0c9">
+<title>لعبة المهن - اختار من أربع صور</title>
+<style>
+*{box-sizing:border-box}body{margin:0;padding:14px;font-family:Tahoma,Arial,sans-serif;background:linear-gradient(145deg,#fff3cf,#ffe2ef 55%,#e0f5ff);color:#48345d}
+main{max-width:700px;margin:auto}header,.game,.finish{background:#fff;border:4px solid #fff;border-radius:28px;padding:20px;text-align:center;box-shadow:0 7px 22px #64446a18}
+header .decor{font-size:38px}h1{font-size:clamp(27px,7vw,38px);margin:8px 0;color:#7045a3}header p{font-size:18px;margin:6px 0}
+.stats{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin:14px 0}.pill{background:#fff;border-radius:30px;padding:10px 16px;font-weight:bold;font-size:17px}
+.game{margin-top:14px;padding:22px 16px}.mode{font-weight:bold;color:#8b6b9d;font-size:17px}.question{font-size:clamp(23px,6vw,31px);font-weight:bold;margin:14px 0}
+.picture{font-size:clamp(75px,20vw,105px);min-height:115px;display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap}
+.options{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:15px}
+button{font-family:inherit;cursor:pointer}.option{border:3px solid #eee0f4;border-radius:23px;background:#fffaf0;min-height:125px;padding:10px 6px;font-size:clamp(17px,4.5vw,22px);font-weight:bold;color:#49345f;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px}
+.option .emoji{font-size:clamp(40px,11vw,54px);line-height:1.2}.option:disabled{opacity:1}.option.correct{background:#dcf8e7;border-color:#46b77a}.option.wrong{background:#ffe4e4;border-color:#e58a8a}
+.feedback{font-size:22px;font-weight:bold;min-height:54px;padding:12px 0 3px}.next,.restart{background:#8054c7;color:#fff;border:0;border-radius:18px;padding:14px 25px;font-size:21px;font-weight:bold;box-shadow:0 5px 0 #5e399c}.next:disabled{opacity:.4;cursor:not-allowed}
+.finish{margin-top:14px}.finish .trophy{font-size:75px}.small{font-size:14px;color:#806c8c;margin-top:14px;text-align:center}
+@media(max-width:360px){body{padding:8px}.option{min-height:110px}}
+</style></head>
+<body><main>
+<header><div class="decor">👩‍⚕️ 👨‍🍳 👩‍🏫 👮</div><h1>يلا نعرف المهن! 🌟</h1><p>شوف السؤال واختار الصورة الصح من أربع صور</p><p>كل إجابة صح تكسبك نجمة ⭐</p></header>
+<div class="stats"><div class="pill">⭐ النجوم: <span id="score">0</span></div><div class="pill">السؤال: <span id="number">1</span> من 8</div></div>
+<section class="game" id="game"><div class="mode" id="mode"></div><div class="question" id="question"></div><div class="picture" id="picture"></div><div class="options" id="options"></div><div class="feedback" id="feedback" aria-live="polite"></div><button class="next" id="next" disabled>السؤال التالي ⬅️</button></section>
+<section class="finish" id="finish" hidden></section><div class="small">لعبة تعليمية بسيطة للأطفال من ٣ إلى ٥ سنوات 💛</div>
+</main>
+<script>
+const questions=[
+{mode:'مين صاحب الأدوات دي؟',q:'مين بيستخدم السماعة الطبية؟',pic:'🩺 🌡️',opts:[['👨‍⚕️','الطبيب'],['👨‍🍳','الطباخ'],['👩‍🏫','المعلمة'],['👮','الشرطي']],a:0},
+{mode:'اختار الأدوات المناسبة',q:'الطباخ بيستخدم إيه؟',pic:'👨‍🍳',opts:[['🍳','حلة ومعلقة'],['🩺','سماعة طبية'],['📚','كتب وأقلام'],['🔨','شاكوش ومنشار']],a:0},
+{mode:'مين صاحب الأدوات دي؟',q:'مين بيستخدم الكتب والطباشير؟',pic:'📚 🖍️',opts:[['👮','الشرطي'],['👩‍🏫','المعلمة'],['🧑‍🚒','رجل الإطفاء'],['👨‍🌾','الفلاح']],a:1},
+{mode:'اختار الأدوات المناسبة',q:'الشرطي بيستخدم إيه؟',pic:'👮',opts:[['🚨','صافرة وكشاف'],['🍳','حلة ومعلقة'],['✂️','مقص ومشط'],['🪚','منشار ومطرقة']],a:0},
+{mode:'مين صاحب الأدوات دي؟',q:'مين بيستخدم الشاكوش والمنشار؟',pic:'🔨 🪚',opts:[['🧑‍🔧','النجار'],['👨‍⚕️','الطبيب'],['👨‍🍳','الطباخ'],['👮','الشرطي']],a:0},
+{mode:'اختار الأدوات المناسبة',q:'الفلاح بيستخدم إيه؟',pic:'👨‍🌾',opts:[['📚','كتب وأقلام'],['🚜','جرار وزرع'],['🩺','سماعة وترمومتر'],['✂️','مقص ومشط']],a:1},
+{mode:'مين صاحب الأدوات دي؟',q:'مين بيستخدم عربية الإطفاء؟',pic:'🚒 🧯',opts:[['🧑‍🚒','رجل الإطفاء'],['👨‍🍳','الطباخ'],['👩‍🏫','المعلمة'],['👨‍🌾','الفلاح']],a:0},
+{mode:'اختار الأدوات المناسبة',q:'الحلاق بيستخدم إيه؟',pic:'💈',opts:[['✂️','مقص ومشط'],['🌡️','ترمومتر'],['📚','كتب وأقلام'],['🚜','جرار وزرع']],a:0}
+];
+let i=0,score=0,locked=false;const $=id=>document.getElementById(id);
+function speak(t){if('speechSynthesis'in window){speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.lang='ar-EG';u.rate=.82;speechSynthesis.speak(u)}}
+function render(){locked=false;const x=questions[i];$('number').textContent=i+1;$('score').textContent=score;$('mode').textContent=x.mode;$('question').textContent=x.q;$('picture').textContent=x.pic;$('feedback').textContent='';$('next').disabled=true;$('next').textContent=i===questions.length-1?'اعرف نتيجتي 🏆':'السؤال التالي ⬅️';$('options').innerHTML='';x.opts.forEach((o,j)=>{const b=document.createElement('button');b.type='button';b.className='option';const e=document.createElement('span');e.className='emoji';e.textContent=o[0];const t=document.createElement('span');t.textContent=o[1];b.append(e,t);b.addEventListener('click',()=>answer(j,b));$('options').appendChild(b)});$('finish').hidden=true;$('game').hidden=false}
+function answer(j,b){if(locked)return;locked=true;const x=questions[i],bs=[...$('options').children];bs.forEach(z=>z.disabled=true);bs[x.a].classList.add('correct');if(j===x.a){score++;$('feedback').textContent='برافووو! شاطر يا بطل! ⭐👏';$('feedback').style.color='#168653';speak('برافو! إجابة صحيحة')}else{b.classList.add('wrong');$('feedback').textContent='ولا يهمك! جرّب السؤال اللي بعده 💛';$('feedback').style.color='#bd594d';speak('محاولة جميلة، يلا السؤال اللي بعده')}$('score').textContent=score;$('next').disabled=false}
+function finish(){$('game').hidden=true;$('finish').hidden=false;$('finish').innerHTML='<div class="trophy">🏆🎉</div><h2>برافو يا بطل!</h2><p style="font-size:24px">جمعت '+score+' من 8 نجوم ⭐</p><p style="font-size:19px">أنت شاطر وبتتعلم كل يوم! 💖</p><button class="restart" id="restart">نلعب تاني 🔄</button>';$('restart').addEventListener('click',start);speak('مبروك يا بطل!')}
+function start(){i=0;score=0;render()}$('next').addEventListener('click',()=>{if(!locked)return;if(i<questions.length-1){i++;render()}else finish()});start();
+</script></body></html>
